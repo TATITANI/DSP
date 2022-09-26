@@ -18,8 +18,8 @@ int main()
     int M, N, P;
     M = 8, N = 8, P = 8;
     A = new float[M * N];
-    B = new float[M * N];
-    C = new float[M * N];
+    B = new float[N * P];
+    C = new float[M * P];
 
     for (int m = 0; m < M; m++)
     {
@@ -30,29 +30,30 @@ int main()
         }
     }
 
-    matrixMultiplication(A, B, C, M, N, P);
-
-    cout << setw(10) << "C" << endl;
-    PrintMatrix(C, M, N);
-
-    cout << setw(10) << "A" << endl;
+    cout << endl << setw(10) << "A 출력" << endl;
     PrintMatrix(A, M, N);
 
-    cout << setw(10) << "Swap row 2,5" << endl;
+    cout << endl << setw(10) << "B 출력" << endl;
+    PrintMatrix(B, M, N);
+
+    cout << endl << setw(10) << "AB 출력" << endl;
+    matrixMultiplication(A, B, C, M, N, P);
+    PrintMatrix(C, M, N);
+
+    cout << endl << setw(10) << " A' - A의 2,5행 교환" << endl;
     float *A2 = new float[M * N];
     swapRow(M, N, A, A2, 2, 5);
     PrintMatrix(A2, M, N);
 
-    cout << setw(10) << "Swap col 3,4" << endl;
+    cout << endl << setw(10) << " B' - B의 3,4열 교환" << endl;
     float *B2 = new float[M * N];
-    swapRow(M, N, B, B2, 3, 4);
+    swapCol(N, P, B, B2, 3, 4);
     PrintMatrix(B2, M, N);
 
-    cout << setw(10) << "Print A'B' " << endl;
+    cout << endl << setw(10) << "A'B' 출력 " << endl;
     float *A2B2 = new float[M * N];
-    matrixMultiplication(A2,B2,A2B2, M , N ,P);
-    PrintMatrix(A2B2,M,N);
-
+    matrixMultiplication(A2, B2, A2B2, M, N, P);
+    PrintMatrix(A2B2, M, N);
 
     return 0;
 }
@@ -72,8 +73,7 @@ float GetAlpha(int n)
 
 void swapRow(int m, int n, float *mA, float *mAd, int ii, int jj)
 {
-    // memcpy(B, A, M * N * sizeof(float));
-    copy(mA, mA + m * n, mAd);
+    memcpy(mAd, mA, m * n * sizeof(float));
     for (int i = 0; i < n; i++)
     {
         mAd[n * ii + i] = mA[n * jj + i];
@@ -83,7 +83,7 @@ void swapRow(int m, int n, float *mA, float *mAd, int ii, int jj)
 
 void swapCol(int m, int n, float *mA, float *mAd, int ii, int jj)
 {
-    copy(mA, mA + m * n, mAd);
+    memcpy(mAd, mA, m * n * sizeof(float));
     for (int i = 0; i < m; i++)
     {
         mAd[n * i + ii] = mA[n * i + jj];
