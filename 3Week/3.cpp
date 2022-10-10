@@ -59,6 +59,7 @@ int main()
 
 void DrawCircle(Display &display, int radius, int thickness)
 {
+    // 원의 중심점 좌표
     const int centerX = Width / 2;
     const int centerY = Height / 2;
     // 연산 비용을 줄이기 위해 0~90도까지만 반복문 실행.

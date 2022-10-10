@@ -18,20 +18,20 @@ struct Note {
 };
 
 int main() {
-    // 1. Read the image file.
-    char *f = new char[48];
-    FILE *fff, *fout, *foutr;
-    if ((fff = fopen("Beatles-LetItBe-wav.wav", "rb")) == NULL) {
-        printf("cant open Beatles-LetItBe-wav.wav.\n");
+    // 1. Read the wav file.
+    char *f = new char[44];
+    FILE *fff, *fout;
+    if ((fff = fopen("LetItGo.wav", "rb")) == NULL) {
+        printf("cant open LetItGo.wav.\n");
         exit(123);
     }
-    // 2. Read the first 48 bytes
-    if ((fread(f, 1, 48, fff) != 48)) {
-        printf("cant read Beatles-LetItBe-wav.wav..\n");
+    // 2. Read the first 44 bytes
+    if ((fread(f, 1, 44, fff) != 44)) {
+        printf("cant read LetItGo.wav..\n");
         exit(444);
     }
-    if ((fout = fopen("Beatles-LetItBe-xxx.wav", "wb")) == NULL) {
-        printf("cant open Beatles-LetItBe-xxx.wav.\n");
+    if ((fout = fopen("LetItGo-xxx.wav", "wb")) == NULL) {
+        printf("cant open LetItGo-xxx.wav.\n");
         exit(123);
     }
 
@@ -46,17 +46,18 @@ int main() {
     printf("bits/sam %d\n", *(WORD *)(f + 34));
     printf("data %c%c%c%c\n", f[36], f[37], f[38], f[39]);
     printf("cksize %d\n", *(DWORD *)(f + 40));  // sub-chunk 2 size
-    DWORD FileSize = *(DWORD *)(f + 40);
+    int size_music = (int)(*(DWORD*)(f+4)) + 8 - 44;
+    printf("size_music : %d\n", size_music);
 
-    if ((fwrite(f, 1, 48, fout) != 48)) {
-        printf("cant write header on Beatles-LetItBe-xxx.wav. \n");
+    if ((fwrite(f, 1, 44, fout) != 44)) {
+        printf("cant write header on LetItGo-xxx.wav. \n");
     }
 
-    FileSize /= 4;  // 4bytes per sample
+    size_music /= 4;  // 4bytes per sample (스테레오)
 
     // 4. modify audio signal to mono.
     const int fs = *(DWORD *)(f + 24);
-    const float dt = 1. / (float)(fs);
+    const float dt = 1. / (float)(fs);  
     //음표 정보
     Note notes[] = {{3.f, 4.5f, 784}, {5.f, 5.5f, 659}, {6.f, 6.5f, 659},
                     {7.f, 7.5f, 784}, {8.f, 8.5f, 659}, {9.f, 10.5f, 523}};
@@ -68,10 +69,9 @@ int main() {
               [](Note a, Note b) { return a.startSecond < b.startSecond; });
 
     short leftdata[N], rightdata[N], alldata[N * 2];
-    for (int n = 0; n < FileSize; n += N) {  // all data
+    for (int n = 0; n < size_music; n += N) {  // all data
         if ((fread(alldata, 4, N, fff)) != N) {
-            printf("cant read %d-th data from Beatles-LetItBe-wav.wav. \n", n);
-            // exit(244);
+            printf("cant read %d-th data from LetItGo.wav. \n", n);
         }
         // store left/right data
         int ii, iii;
@@ -83,7 +83,6 @@ int main() {
         // modify left/right data
         for (int i = 0; i < N; i++) {
             float currentTime = (float)(n + i) / fs;
-
             // 곡 삽입구간 데이터 초기화
             if (currentTime > notes[0].startSecond &&
                 currentTime < notes[notesCnt - 1].endSecond) {
@@ -111,7 +110,7 @@ int main() {
 
         // 5. write on output file
         if (fwrite(alldata, 4, N, fout) != N) {
-            printf("cant write %d-th data on Beatles-LetItBe-xxx.wav. \n", n);
+            printf("cant write %d-th data on LetItGo-xxx.wav. \n", n);
         }
     }  // all data
 
