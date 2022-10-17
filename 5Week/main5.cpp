@@ -22,7 +22,6 @@ void SolveProblem2()
 {
     cout << endl
          << "===problem2===" << endl;
-    // 2 : x = 1.02 + 0.81j, y = -0.29 + 0.43j
     // ax + by = e
     // cx + dy = f
     // x = (ed-fb)/(ad-bc), y = (af-ce)/(ad-bc)
@@ -34,27 +33,32 @@ void SolveProblem2()
     y.Print("y");
 }
 
-void SolveProblem3()
+void GenerateVmn(int N, int m, int n)
 {
-    cout << endl << "===problem3===" << endl;
-
-    const int N = 8;
-    const int m = 6, n = 6;
-    Complex Vm(0, 0), Vn(0, 0), Vmn(0,0);
+    Complex Vmn(0, 0);
     for (int i = 0; i < N; i++)
     {
         Complex mi(cos(2 * PI * m * i / N) / sqrt(N), sin(2 * PI * m * i / N) / sqrt(N));
-        Vm += mi;
-        Complex ni(cos(2 * PI * n * i / N) / sqrt(N), sin(2 * PI * n * i / N) / sqrt(N));
-        Vn += ni;
-        Complex mni(cos(2 * PI * (m-n) * i / N), sin(2 * PI * (m-n) * i / N));
-        Vmn += mni;
+        Complex ni(cos(2 * PI * n * i / N) / sqrt(N), -sin(2 * PI * n * i / N) / sqrt(N));
+        Vmn += (mi * ni);
     }
-    Vmn = Vmn/N;
-
-    Vm.Print("Vm");
-    (Vm * Vn).Print("result");
+    cout << "m = " << m << ", n = " << n << " => ";
     Vmn.Print("Vmn");
+}
+
+void SolveProblem3()
+{
+    cout << endl
+         << "===problem3===" << endl;
+    const int N = 8;
+    for (int m = 0; m < N; m++)
+    {
+        for (int n = 0; n < N; n++)
+        {
+            GenerateVmn(N, m, n);
+        }
+        cout << endl;
+    }
 }
 
 void SolveProblem4()
@@ -62,7 +66,6 @@ void SolveProblem4()
     cout << endl
          << "===problem4===" << endl;
     // 3x^2 + 2x + 7 = 0;
-    //  x = -0.333+1.4907j or x = -0.333 - 1.4907j
     float a = 3, b = 2, c = 7;
     float discriminant = b * b - 4 * a * c;
 
