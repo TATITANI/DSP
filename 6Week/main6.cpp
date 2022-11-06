@@ -35,9 +35,10 @@ void Problem1()
 
     vector<int> result = Convolution(x, h1);
     result = Convolution(result, h2);
-    for (auto r : result)
+    for(int id = 0; id< result.size(); id++)
     {
-        cout << r << "  ";
+        cout << id<< ", " << result[id]<< endl;
+
     }
     cout << endl;
 }
@@ -52,15 +53,18 @@ void Problem2()
         expArr.push_back(t <0 ? 0 : exp(-t));
     }
     vector<float> result = Convolution(cosArr, expArr);
-    for (auto r : result)
+     for(int id = 0; id< result.size(); id++)
     {
-        cout << r << "  ";
+        cout << id<< ", " << result[id]<< endl;
+
     }
     cout << endl;
 }
 
 int main()
 {
+    cout << "=== problem 1 ===\n";
     Problem1();
+    cout << "=== problem 2 ===\n";
     Problem2();
 }
