@@ -2,6 +2,11 @@
     "files.associations": {
         "cmath": "cpp",
         "ostream": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "fstream": "cpp",
+        "xiosbase": "cpp",
+        "istream": "cpp",
+        "iosfwd": "cpp",
+        "xstring": "cpp"
     }
 }

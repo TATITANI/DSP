@@ -13,7 +13,6 @@
 //     int k0 = 200;
 
 //     Complex *x = new Complex[N];
-//     for (int n = 0; n < N; n++) {
 //         x[n] = Complex(cos((2 * PI * k0 * n) / (double)N), 0);
 //     }
 

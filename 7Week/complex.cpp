@@ -1,57 +1,87 @@
-#include "complex.h"
+#include <iostream>
+#include <math.h>
+#include"complex.h"
+#define PHI 3.141592
+using namespace std;
 
-Complex Complex::operator+(const Complex &y)
-{
-    Complex c;
-    c.re = re + y.re;
-    c.im = im + y.im;
-    return c;
+// complex suh 2011. 7. 15
+double complex::mag() {
+	return sqrt(re*re + im * im);
 }
-Complex Complex::operator+=(const Complex &y)
-{
-    re += y.re;
-    im += y.im;
+double complex::phase() {
+	if (re == 0.0) {
+		if (im >= 0.0)
+			return PHI / 2.0;
+		else
+			return -PHI / 2.0;
+	}
+	else
+		return atan(im / re);
 }
+complex complex::operator/(const complex& y)
+{
+	complex c;
+	c = complex(y.re, -y.im);
+	//double xx = c++;
+	if (re == 0.0 && im == 0.0) { cout << " complex: divided by 0\n"; return c; }
+	c = (*this * c) / (y.re*y.re + y.im * y.im);
+	return c;
+}
+complex& complex::operator=(const complex& x)
+{
+	re = x.re;
+	im = x.im;
+	return *this;
+}
+complex& complex::operator+=(const complex& y)
+{
+	re += y.re;
+	im += y.im;
+	return *this;
+} // left가 바뀌는 것이 문제이다.
+complex complex::operator+(const complex& y)
+{
+	complex c;
+	c.re = re + y.re;
+	c.im = im + y.im;
+	return c;
+} // left가 바뀌지 않는다.
+complex complex::operator-(const complex& y)
+{
+	complex c;
+	c.re = re - y.re;
+	c.im = im - y.im;
+	return c;
+} // left가 바뀌지 않는다.
+complex complex::operator*(const complex& y)
+{
+	complex c;
+	c.re = re * y.re - im * y.im;
+	c.im = re * y.im + im * y.re;
+	return c;
+}
+complex complex::operator/(const double& y)
+{
+	complex c;
+	c.re = re / y;
+	c.im = im / y;
+	return c;
+}
+complex complex::operator*(const double& y)
+{
+	complex c;
+	c.re = re * y;
+	c.im = im * y;
+	return c;
+}
+// magnitude 
+/*double complex::operator++()
+{
+return re*re + im * im;
+}*/
 
-Complex Complex::operator-(const Complex &y)
+/*complex& complex::operator--()
 {
-    Complex c;
-    c.re = re - y.re;
-    c.im = im - y.im;
-    return c;
-}
-
-Complex Complex::operator*(const Complex &y)
-{
-    //(re+im*j)(re2+im2*j) = (re*re2-im*im2)+(re*im2+im*re2)
-    Complex c;
-    c.re = re * y.re - im * y.im;
-    c.im = re * y.im + im * y.re;
-    return c;
-};
-
-Complex Complex::operator/(const Complex &y)
-{
-    Complex c;
-    c = Complex(y.re, -y.im);
-    if (re == 0.0 && im == 0.0)
-    {
-        cout << " complex: divided by 0\n";
-        return c;
-    }
-    c = (*this * c) / (y.re * y.re + y.im * y.im);
-    return c;
-}
-
-Complex Complex::operator/(const float &y) 
-{
-    Complex c;
-    c.re = re / y;
-    c.im = im / y;
-    return c;
-}
-
-void Complex::Print(string name)
-{
-    cout << name << " = " << re << (im >= 0 ? " +" : " ") << im << "j" << endl;
-}
+im = -im;
+return *this;
+}*/

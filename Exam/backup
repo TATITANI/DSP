@@ -1,0 +1,151 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+
+#define WORD unsigned short
+#define DWORD unsigned int
+#define NN 4096
+#define N 1024
+#define PI 3.141592
+
+template <typename T>
+vector<T> Convolution(vector<T> x, vector<T> h)
+{
+    const int len = x.size() + h.size() - 1;
+
+    vector<T> result(len);
+    for (int n = 0; n < N; n++)
+    {
+        for (int k = 0; k < x.size(); k++)
+        {
+            if (n - k >= h.size() || (n - k) < 0)
+            {
+                continue;
+            }
+            result[n] += x[k] * h[n - k];
+        }
+    }
+
+    return result;
+}
+
+int main()
+{
+    // 1. Read the wav file.
+    char *f = new char[44];
+    FILE *fff, *fout;
+    if ((fff = fopen("noiseMusic.wav", "rb")) == NULL)
+    {
+        printf("cant open noiseMusic.wav.\n");
+        exit(123);
+    }
+    // 2. Read the first 44 bytes
+    if ((fread(f, 1, 44, fff) != 44))
+    {
+        printf("cant read noiseMusic.wav..\n");
+        exit(444);
+    }
+    if ((fout = fopen("out_music1.wav", "wb")) == NULL)
+    {
+        printf("cant open out_music1.wav.\n");
+        exit(123);
+    }
+
+    int size_music = (int)(*(DWORD *)(f + 4)) + 8 - 44;
+
+    if ((fwrite(f, 1, 44, fout) != 44))
+    {
+        printf("cant write header on LetItGo-xxx.wav. \n");
+    }
+
+    size_music /= 2; // mono
+
+    // 4. modify audio signal to mono.
+
+    // h[n] 정의
+    vector<float> h;
+    const int L = 25;
+    for (int n = 0; n < L; n++)
+    {
+        float value = sin(PI / 4 * (n - (float)(L - 1) / 2.f)) / (PI * (n - float(L - 1) / 2.f));
+        h.push_back(value);
+    }
+
+    short *alldata = new short[size_music];
+    if ((fread(alldata, 2, size_music, fff)) != size_music)
+    {
+        cout << "can't read" << endl;
+    }
+
+    vector<float> x;
+    for (int i = 0; i < size_music; i++)
+    {
+        x.push_back(alldata[i]);
+    }
+    vector<float> result = Convolution(x, h);
+    for (int i = 0; i < size_music; i++)
+    {
+        alldata[i] = (short)result[i];
+    }
+    if (fwrite(alldata, 2, size_music, fout) != size_music)
+    {
+        cout << "can't write" << endl;
+    }
+
+    // short leftdata[N], rightdata[N], alldata[N * 2];
+    // for (int n = 0; n < size_music; n += N)
+    // { // all data
+    //     if ((fread(alldata, 4, N, fff)) != N)
+    //     {
+    //         // printf("cant read %d-th data from noiseMusic.wav. \n", n);
+    //     }
+    //     // store left/right data
+    //     int ii, iii;
+    //     for (ii = iii = 0; ii < N; ii++, iii += 2)
+    //     {
+    //         leftdata[ii] = alldata[iii];
+    //         rightdata[ii] = alldata[iii + 1];
+    //     }
+
+    //     // x[n] 정의 (기본 음원)
+    //     vector<float> x;
+    //     for(auto data : alldata)
+    //     {
+    //         x.push_back(data);
+    //     }
+
+    //     vector<float> result = Convolution(x, h);
+    //     for(int i)
+    //     // // modify left/right data
+    //     // for (ii = iii = 0; ii < N; ii++, iii += 2)
+    //     // {
+    //     //     leftdata[ii] = result[iii];
+    //     //     rightdata[ii] = result[iii + 1];
+    //     // }
+
+    //     // // restore left/right data
+    //     // for (ii = iii = 0; ii < N; ii++, iii += 2)
+    //     // {
+    //     //     alldata[iii] = leftdata[ii];
+    //     //     alldata[iii + 1] = rightdata[ii];
+    //     // }
+
+    //     // 5. write on output file
+    //     if (fwrite(alldata, 4, N, fout) != N)
+    //     {
+    //         printf("cant write %d-th data on noiseMusic-xxx.wav. \n", n);
+    //     }
+    // } // all data
+
+    fclose(fff);
+    fclose(fout);
+    delete f;
+
+    return 1;
+}
