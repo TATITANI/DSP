@@ -8,7 +8,7 @@ using namespace std;
 #define DWORD unsigned int
 #define PI 3.141592
 
-#define MusicSize 16000
+#define MusicSize 32000 // 16000
 /* system example : DIR */
 
 int header_size = 44;                 // wav 헤더 44 바이트
@@ -35,11 +35,9 @@ void ReadHeader(ifstream &fff)
 void WriteDFT(ifstream &_ifstream, char *fileName, complex *X)
 {
     short data[MusicSize];
-    // seekg를 이용한 파일 크기 추출
-    _ifstream.seekg(0, _ifstream.end);
-    int length = (int)_ifstream.tellg();
-    _ifstream.seekg(0, _ifstream.beg);
-    _ifstream.read((char *)data, length);
+    char * header = new char[header_size];
+    _ifstream.read((char *)header, header_size);
+    _ifstream.read((char *)data, MusicSize);
 
     // DFT
     for (int k = 0; k < MusicSize; k++)
@@ -85,10 +83,10 @@ void ModifyNoise(ifstream &_ifstream, char *wavName, complex *X)
     ofstream out;
     out.open(wavName, ios::binary);
     out.write(header, header_size);
-    out.seekp(header_size);
-    out.write((char *)result, MusicSize * 2);
+    out.write((char *)result, MusicSize);
     out.close();
 }
+
 int main()
 {
     ifstream originFile, mixFile;
