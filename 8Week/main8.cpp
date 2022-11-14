@@ -8,14 +8,12 @@ const int H = 64, W = 64;
 #define PI 3.141592
 
 const int headersize = 54; // bmp 헤더 사이즈
-char header[headersize];
 
 // 흑백이므로 R성분만 리턴
-unsigned char **ReadImage(ifstream &InFile, const char *fileName)
+unsigned char **ReadImage(ifstream &InFile, const char *fileName, char *header)
 {
 	InFile.open(fileName, ios::binary);
 
-	// char *header = new char[headersize];
 	InFile.read((char *)header, headersize);
 	int H = 64, W = 64;
 
@@ -61,7 +59,7 @@ unsigned char **ReadImage(ifstream &InFile, const char *fileName)
 	return R;
 }
 
-void WriteImage(ofstream &Result, const char *fileName, complex **R_)
+void WriteImage(ofstream &Result, const char *fileName, complex **R_, char *header, bool UpInverse = false)
 {
 	Result.open(fileName, ios::binary);
 	Result.write((char *)header, headersize);
@@ -81,9 +79,20 @@ void WriteImage(ofstream &Result, const char *fileName, complex **R_)
 		}
 	}
 
-	for (int i = 0; i < H; i++)
+	// 상하반전 : BMP는 위에서부터 데이터를 읽기 때문에 DFT 이미지는 상하반전한 데이터를 저장한다.
+	if (UpInverse)
 	{
-		Result.write((char *)RGB[i], 3 * W);
+		for (int i = H - 1; i >= 0; i--)
+		{
+			Result.write((char *)RGB[i], 3 * W);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < H; i++)
+		{
+			Result.write((char *)RGB[i], 3 * W);
+		}
 	}
 
 	Result.close();
@@ -95,8 +104,10 @@ void WriteImage(ofstream &Result, const char *fileName, complex **R_)
 	delete[] RGB;
 }
 
-complex **GenerateDFT(unsigned char **R, double &max)
+complex **GenerateDFT(unsigned char **R, double &max, const char *fileName)
 {
+	#pragma region DFT(2D)
+
 	complex **dft;
 	dft = new complex *[H];
 	for (int i = 0; i < H; i++)
@@ -114,7 +125,7 @@ complex **GenerateDFT(unsigned char **R, double &max)
 				{
 					dft[v][u] += complex(cos(-2 * PI * (u * x / (double)W + v * y / (double)H)),
 										 sin(-2 * PI * (u * x / (double)W + v * y / (double)H))) *
-								 (int)R[y][x];
+								 (double)R[y][x];
 				}
 			}
 			if (dft[v][u].mag() > max)
@@ -123,16 +134,25 @@ complex **GenerateDFT(unsigned char **R, double &max)
 			}
 		}
 	}
-
-	return dft;
-
-#pragma region DFT(2D)
-
 #pragma endregion
 
 #pragma region DFT check EXCEL
 
+	// dft amplitude 저장
+	ofstream dftFile;
+	dftFile.open(fileName);
+	for (int v = 0; v < H; v++)
+	{
+		for (int u = 0; u < W; u++)
+		{
+			dftFile << dft[v][u].mag() << ",";
+		}
+		dftFile << endl;
+	}
+
+	return dft;
 #pragma endregion
+
 }
 
 complex **NormalizeDFT(complex **dft, double &max)
@@ -157,7 +177,7 @@ complex **NormalizeDFT(complex **dft, double &max)
 	return normalizedDFT;
 }
 
-complex ** GenerateIDFT(complex **dft)
+complex **GenerateIDFT(complex **dft)
 {
 #pragma region IDFT(2D)
 	complex **R_; // DFT, IDFT 저장공간
@@ -166,7 +186,19 @@ complex ** GenerateIDFT(complex **dft)
 	{
 		R_[i] = new complex[W];
 	}
-
+	
+	// 필터 단위 한 개에 해당하는 이미지 크기
+	const int filterUnitSize = 8;
+	double filter[H/filterUnitSize][W/filterUnitSize] = {
+		1.2,1,1,1,1,1,1,2.5,
+		1,1,1,1,1,1,1,1,
+		1,1,0,0,0,0,1,1,
+		1,1,0,0,0,0,1,1,
+		1,1,0,0,0,0,1,1,
+		1,1,0,0,0,0,1,1,
+		1,1,1,1,1,1,1,1,
+		2.5,1,1,1,1,1,1,2.5,
+	};
 	// 2D IDFT 선언
 	for (int y = 0; y < H; y++)
 	{
@@ -176,40 +208,62 @@ complex ** GenerateIDFT(complex **dft)
 			{
 				for (int u = 0; u < W; u++)
 				{
-					R_[y][x] += complex(cos(-2 * PI * (u * x / (double)W + v * y / (double)H)),
-										sin(-2 * PI * (u * x / (double)W + v * y / (double)H))) *
-								dft[v][u];
+					R_[y][x] += complex(cos(2 * PI * (u * x / (double)W + v * y / (double)H)),
+										sin(2 * PI * (u * x / (double)W + v * y / (double)H))) *
+								dft[v][u] * filter[v / filterUnitSize][u / filterUnitSize];
 				}
 			}
 			R_[y][x] = R_[y][x] / (double)(W * H);
+			if (R_[y][x].re > 255)
+				R_[y][x].re = 255;
 		}
 	}
 
+	return R_;
 #pragma endregion
-return R_;
+}
+
+void ImageProcessDFT(const char *inputFileName, const char *dataFileName,
+					 const char *dftFileName, const char *idftFileName = nullptr)
+{
+	// read
+	char *header = new char[headersize];
+	ifstream InFile;
+	unsigned char **R = ReadImage(InFile, inputFileName, header);
+	// DFT
+	double max = 0;
+	complex **dft = GenerateDFT(R, max, dataFileName);
+	ofstream fileDFT;
+	complex **normDFT = NormalizeDFT(dft, max);
+	WriteImage(fileDFT, dftFileName, normDFT, header, true);
+
+	bool isIDFT = (idftFileName != nullptr);
+	// IDFT
+	if (isIDFT)
+	{
+		complex **R_ = GenerateIDFT(dft);
+		ofstream fileIDFT;
+		WriteImage(fileIDFT, idftFileName, R_, header);
+		for (int i = 0; i < H; i++)
+		{
+			delete[] R_[i];
+		}
+		delete[] R_;
+	}
+
+	for (int i = 0; i < H; i++)
+	{
+		delete[] normDFT[i], dft[i], R[i];
+	}
+	delete[] normDFT, dft, R;
+	delete header;
 }
 
 int main()
 {
-	ifstream InFile, InNoiseFile;
-	unsigned char **R = ReadImage(InFile, "twin_64.bmp");
-	// ReadImage(InFile, "twin_noise_64.bmp");
-
-	//원본
-	double max1 = 0;
-	complex **dft = GenerateDFT(R, max1);
-	ofstream originDFT;
-	complex **normDFT = NormalizeDFT(dft, max1);
-	WriteImage(originDFT, "re_twin_DFT.bmp", normDFT);
-	complex** R_ = GenerateIDFT(dft);
-	ofstream originIDFT;
-	WriteImage(originIDFT, "re_twin.bmp", R_);
-	
-	for (int i = 0; i < H; i++)
-	{
-		delete[] R_[i];
-	}
-	delete[] R_;
-
-	return 0;
+	//원본 이미지 처리
+	ImageProcessDFT("twin_64.bmp", "originData.csv", "twin_DFT.bmp");
+	//잡음 이미지 처리
+	ImageProcessDFT("twin_noise_64.bmp", "NoiseData.csv", "twin_noise_DFT.bmp", "re_twin_noise_IDFT.bmp");
+	return 1;
 }
