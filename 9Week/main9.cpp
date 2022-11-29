@@ -17,8 +17,24 @@ void HW1(double** dct, uchar** HW1_img,char* header);
 void DCT_1D(double* data, double* dct);
 void IDCT_1D(double* dct, double* result_data);
 
-void GenerateCase(uchar **R, double **dct, int filter[8][8], uchar **R_, ofstream &outFile)
+void GenerateCase(uchar **originR, int filter[8][8], ofstream &outFile)
 {
+	// 흑백 이미지이므로 R성분만 사용
+	uchar **R = new uchar *[H];
+	uchar **R_ = new uchar *[H];
+	double **dct = new double*[H];
+	for (int i = 0; i < H; i++)
+	{
+		R[i]= new uchar[W];
+		R_[i]= new uchar[W];
+		dct[i]= new double[W];
+		for (int j = 0; j < W; j++)
+		{
+			//원본 이미지의 R성분 복사
+			R[i][j] = originR[i][j];
+		}
+	}
+
 	DCT(R, dct, filter);
 	IDCT(dct, R_);
 
@@ -37,76 +53,68 @@ void GenerateCase(uchar **R, double **dct, int filter[8][8], uchar **R_, ofstrea
 	for (int i = 0; i < H; i++)
 	{
 		outFile.write((char *)RGB[i], 3 * W);
+		// delete[] R[i];
+		// delete[] R_[i];
+		// delete[] dct[i];
 	}
+	// delete[] R;
+	// delete[] R_;
+	// delete[] dct;
+	
 }
 
 int main()
 {
-#pragma region 변수 설정 
-	uchar** RGB;
-	uchar** R;
-	uchar** G;
-	uchar** B;
-	
-	uchar** R_;
-	uchar** G_;
-	uchar** B_;
-	uchar** RGB_;
+#pragma region 변수 설정
+	uchar **RGB;
+	uchar **R;
+	uchar **G;
+	uchar **B;
 
-	double** dct;
-
-	RGB = new uchar*[H];
-R = new uchar*[H];
-G = new uchar*[H];
-B = new uchar*[H];
-R_ = new uchar*[H];
-G_ = new uchar*[H];
-B_ = new uchar*[H];
-RGB_ = new uchar*[H];
-dct = new double*[H];
-for (int i = 0; i < H; i++) {
-	RGB[i] = new uchar[3 * W];
-	R[i] = new uchar[W];
-	G[i] = new uchar[W];
-	B[i] = new uchar[W];
-	R_[i] = new uchar[W];
-	G_[i] = new uchar[W];
-	B_[i] = new uchar[W];
-	RGB_[i] = new uchar[3 * W];
-	dct[i] = new double[W];
-}
+	RGB = new uchar *[H];
+	R = new uchar *[H];
+	G = new uchar *[H];
+	B = new uchar *[H];
+	for (int i = 0; i < H; i++)
+	{
+		RGB[i] = new uchar[3 * W];
+		R[i] = new uchar[W];
+		G[i] = new uchar[W];
+		B[i] = new uchar[W];
+	}
 
 #pragma endregion
 
-#pragma region 초기화 영역 
-ifstream Infile;
+#pragma region 초기화 영역
+	ifstream Infile;
 
+	Infile.open("twin_.bmp", ios::binary);
+	char *header = new char[54];
 
-Infile.open("twin_.bmp", ios::binary);
-char* header = new char[54];
+	Infile.read((char *)header, 54);
+	for (int i = 0; i < H; i++)
+		Infile.read((char *)RGB[i], 3 * W);
 
-Infile.read((char*)header, 54);
-for (int i = 0; i < H; i++)
-	Infile.read((char*)RGB[i], 3 * W);
+	ofstream outFile1, outFile2, outFile3; // case 1,2,3 결과 이미지 파일
+	outFile1.open("twin_out1.bmp", ios::binary);
+	outFile2.open("twin_out2.bmp", ios::binary);
+	outFile3.open("twin_out3.bmp", ios::binary);
+	outFile1.write((char *)header, 54);
+	outFile2.write((char *)header, 54);
+	outFile3.write((char *)header, 54);
 
-ofstream outFile1, outFile2, outFile3; // case 1,2,3 결과 이미지 파일
-outFile1.open("twin_out1.bmp", ios::binary);
-outFile2.open("twin_out2.bmp", ios::binary);
-outFile3.open("twin_out3.bmp", ios::binary);
-outFile1.write((char *)header, 54);
-outFile2.write((char *)header, 54);
-outFile3.write((char *)header, 54);
-
-#pragma endregion 
+#pragma endregion
 
 #pragma region RGB 분리
-for (int i = 0; i < H; i++) {
-	for (int j = 0, jj = 0; j < W; j++, jj += 3) {
-		B[i][j] = RGB[i][jj];
-		G[i][j] = RGB[i][jj + 1];
-		R[i][j] = RGB[i][jj + 2];
+	for (int i = 0; i < H; i++)
+	{
+		for (int j = 0, jj = 0; j < W; j++, jj += 3)
+		{
+			B[i][j] = RGB[i][jj];
+			G[i][j] = RGB[i][jj + 1];
+			R[i][j] = RGB[i][jj + 2];
+		}
 	}
-}
 #pragma endregion
 
 int filter1[8][8] = 
@@ -116,9 +124,9 @@ int filter1[8][8] =
 	1,1,1,1,1,0,0,0,
 	1,1,1,1,1,0,0,0,
 	1,1,1,1,1,0,0,0,
-	1,1,1,1,1,0,0,0,
-	1,1,1,1,1,0,0,0,
-	1,1,1,1,1,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
 };
 int filter2[8][8] = 
 {
@@ -143,10 +151,9 @@ int filter3[8][8] =
 	1,1,1,1,1,1,1,1,
 };
 
-GenerateCase(R, dct, filter1, R_, outFile1);// case 1
-GenerateCase(R, dct, filter2, R_, outFile2);// case 2
-GenerateCase(R, dct, filter3, R_, outFile3);// case 3
-
+GenerateCase(R, filter1, outFile1); // case 1
+GenerateCase(R, filter2, outFile2); // case 2
+GenerateCase(R, filter3, outFile3); // case 3
 
 // 압선 DFT보다 매우 빠른 연산 속도 (DFT는 1024x1024 영상을 처리하는데 12일이 필요함) 
 // 고주파수에 해당하는 영역을 제거하여도
@@ -159,15 +166,11 @@ for (int i = 0; i < H; i++) {
 	delete[] R[i];
 	delete[] G[i];
 	delete[] B[i];
-	delete[] RGB_[i];
-	delete[] dct[i];
 }
 delete[] RGB;
 delete[] R;
 delete[] G;
 delete[] B;
-delete[] RGB_;
-delete[] dct;
 
 #pragma endregion
 
@@ -271,7 +274,6 @@ void IDCT(double** dct, uchar** result_img)
             result_img[j][i] = sum;
          }
     }
-
 }
 
 void IDCT_1D(double* dct, double* result_data)
