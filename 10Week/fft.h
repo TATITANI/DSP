@@ -12,25 +12,6 @@ typedef struct tagCOMPLEX {
 
 void Compute_Spectrum(double **Real, double **Imag, int W, int H, double **Spectrum)
 {
-    // // 중심이동
-    // int centerX = W / 2, centerY = H / 2;
-    // for (int cx = 0; cx < W; cx++)
-    // {
-    //     for (int cy = 0; cy < centerY; cy++)
-    //     {
-    //         int oppositeX = cx < centerX ? cx + centerX : cx - centerX;
-    //         int oppositeY = cy + centerY;
-
-    //         double oppositeValue = Real[oppositeX][oppositeY];
-    //         Real[oppositeX][oppositeY] = Real[cx][cy];
-    //         Real[cx][cy] = oppositeValue;
-
-    //         oppositeValue = Imag[oppositeX][oppositeY];
-    //         Imag[oppositeX][oppositeY] = Imag[cx][cy];
-    //         Imag[cx][cy] = oppositeValue;
-    //     }
-    // }
-
     int u, v;
     for (u = 0; u < W; u++)
     {

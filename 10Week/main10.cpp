@@ -99,35 +99,6 @@ void ImageProcess(uchar ** RGB, ofstream &outSpectrum, ofstream *outRestore = nu
         IFFT_2D(R_, imag_, R2, imag2_, W, H);
         DNormalize2D(R2, R, W, H);
         
-        // sharpening mask
-        int mask[3][3] = {
-            -1,-1,-1,
-            -1,9,-1,
-            -1,-1,-1,
-        };
-        for (int i = 0; i < H; i++)
-        {
-            for (int j = 0; j < W; j++)
-            {
-                int sum = 0;
-                for (int mx = 0; mx < 3; mx++)
-                {
-                    for (int my = 0; my < 3; my++)
-                    {
-                        int ry = i + my - 1;
-                        int rx = j + mx - 1;
-                        if(rx> 0 && rx< W && ry >0 && ry <H)
-                        {
-                            sum += mask[my][mx] * (int)R[ry][rx];                            
-                        }
-                    }
-                }
-                if(sum >255) sum = 255;
-                else if(sum < 0) sum =0;
-                // R[i][j] = sum;
-            }
-        }
-
         for (int i = 0; i < H; i++)
         {
             for (int j = 0, jj = 0; j < W; j++, jj += 3)
@@ -222,7 +193,7 @@ outFileNoiseSpectrum.close();
 outFileRestore.close();
 #pragma endregion
 
-// system("pause");
+system("pause");
 
 
 return 0;
