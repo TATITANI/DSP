@@ -39,23 +39,22 @@
 
 결과
 
-<img src = "https://user-images.githubusercontent.com/32747387/212476714-38ecd061-0436-474b-b230-3f242ec2763b.png" width="500" height="250">
+<img src = "https://user-images.githubusercontent.com/32747387/212476714-38ecd061-0436-474b-b230-3f242ec2763b.png" width="500" height="200">
 
 ***
 ### 10 - FFT : 영상 잡음 제거
 
-<img src = "https://user-images.githubusercontent.com/32747387/212476886-7f680cb5-7003-4607-8835-accb90c1e9c4.png" width="500" height="250">
+<img src = "https://user-images.githubusercontent.com/32747387/212476886-7f680cb5-7003-4607-8835-accb90c1e9c4.png" width="500" height="180">
 
 ***
 ### 11 - Filtering
 
-<img src = "https://user-images.githubusercontent.com/32747387/212477028-007cc7bd-9c4e-4478-ace1-4a5b118cc3e0.png" width="500" height="250">
+<img src = "https://user-images.githubusercontent.com/32747387/212477028-007cc7bd-9c4e-4478-ace1-4a5b118cc3e0.png" width="500" height="200">
 <img src = "https://user-images.githubusercontent.com/32747387/212477063-1bbd0cf5-d8cc-49eb-b039-b1fb148aa823.png" width="500" height="250">
 
 결과
 
-<img src = "https://user-images.githubusercontent.com/32747387/212477242-e66ff794-64a6-41b5-9e33-62c8886b5576.png" width="500" height="250">
-<img src = "https://user-images.githubusercontent.com/32747387/212477315-87321f36-709c-4461-bcb8-a0b572c3f3ab.png" width="500" height="250">
-<img src = "https://user-images.githubusercontent.com/32747387/212477318-695fa026-8819-4bd3-8af3-bc8ca051bd7e.png" width="500" height="250">
+<img src = "https://user-images.githubusercontent.com/32747387/212477876-55f76033-7155-4c5e-bb2d-594e42dacfa2.png" width="800" height="250">
+
 
 
